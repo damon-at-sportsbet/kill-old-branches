@@ -1,0 +1,44 @@
+#!/bin/bash
+
+BEFORE_DAYS=30
+
+if [[ "$2" ]]; then
+  BEFORE_DAYS=$2
+fi
+
+FROM_DATE=$(date -j -v-"${BEFORE_DAYS}d" +"%b %m, %Y")
+
+if [[ "$1" == "do-it" ]]; then
+  echo "deleting branches"
+  DO_IT=true
+elif [[ "$1" == "list" ]]; then
+  LIST=true
+  echo "Branches for deletion are any merged branches from before $FROM_DATE"
+else 
+  echo ""
+  echo "Deleter of merged branches"
+  echo "defaults to branches more than 30 days old"
+  echo "kill-old-branches [list|do-it] [older-than-days]" 
+  echo ""
+  echo "e.g:"
+  echo "kill-old-branches list"
+  echo "kill-old-branches do-it"
+  echo "kill-old-branches list 20" 
+  echo "kill-old-branches do-it 20"
+  echo ""
+  echo ""
+  exit
+fi
+
+ 
+for k in $(git branch -r --merged master | grep -v master | sed -e 's/origin\///'); do
+if [ -z "$(git log -1 --since="$FROM_DATE" -s origin/$k)" ]; then
+  if [[ "$DO_IT" == "true" ]]; then
+    echo "git push --delete origin $k"
+  elif [[ "$LIST" == "true" ]]; then
+    echo "$(git log -1 --pretty=format:"%ct" origin/$k) origin/$k";
+  else
+    echo "usage: --list or --do-it"
+  fi
+fi
+done
