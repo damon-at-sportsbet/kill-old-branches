@@ -6,7 +6,7 @@ if [[ "$2" ]]; then
   BEFORE_DAYS=$2
 fi
 
-FROM_DATE=$(date -j -v-"${BEFORE_DAYS}d" +"%b %m, %Y")
+FROM_DATE=$(date -j -v-"${BEFORE_DAYS}d" +"%b %d, %Y")
 
 if [[ "$1" == "do-it" ]]; then
   echo "deleting branches"
@@ -34,7 +34,7 @@ fi
 for k in $(git branch -r --merged master | grep -v master | sed -e 's/origin\///'); do
 if [ -z "$(git log -1 --since="$FROM_DATE" -s origin/$k)" ]; then
   if [[ "$DO_IT" == "true" ]]; then
-    echo "git push --delete origin $k"
+    git push --delete origin $k
   elif [[ "$LIST" == "true" ]]; then
     echo "$(git log -1 --pretty=format:"%ct" origin/$k) origin/$k";
   else
